@@ -91,7 +91,6 @@ private:
 	inline constexpr static std::array m_strides{ strides... };
 
 private:
-	template <typename T, std::size_t... strides>
 	class Iterator {
 	public:
 		constexpr Iterator operator++(int) {
@@ -113,15 +112,13 @@ private:
 		}
 
 	private:
-		constexpr Iterator() = default;
-		constexpr Iterator(MDSpan<T, strides...>& owner, std::size_t index = 0)
+		constexpr Iterator(MDSpan& owner, std::size_t index = 0)
 			: m_owner{ owner }, m_index{ index } {
 		}
-
-		friend class MDSpan<T, strides...>;
+		friend class MDSpan;
 
 	private:
-		MDSpan<T, strides...>& m_owner;
+		MDSpan& m_owner;
 		std::size_t m_index;
 	};
 };
