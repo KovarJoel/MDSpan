@@ -49,6 +49,9 @@ public:
 		return DropFirstPackValue_t<MDSpan, T, strides...>{ begin };
 	}
 
+	constexpr T* data() {
+		return m_begin;
+	}
 	constexpr auto begin() {
 		return Iterator{ *this };
 	}
