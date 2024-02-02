@@ -111,8 +111,14 @@ private:
 			return *this;
 		}
 
-		constexpr auto operator*() {
+		constexpr auto operator*() requires(sizeof...(strides) > 1) {
 			return m_owner[m_index];
+		}
+		constexpr T& operator*() requires(sizeof...(strides) == 1) {
+			return m_owner[m_index];
+		}
+		constexpr const T& operator*() const requires(sizeof...(strides) == 1) {
+			return m_strides[m_index];
 		}
 
 		constexpr bool operator==(const Iterator& other) const {
