@@ -100,6 +100,14 @@ private:
 			++m_index;
 			return *this;
 		}
+		constexpr Iterator operator--(int) {
+			return Iterator{ m_owner, m_index-- };
+		}
+		constexpr Iterator operator--() {
+			--m_index;
+			return *this;
+		}
+
 		constexpr auto operator*() {
 			return m_owner[m_index];
 		}
