@@ -15,9 +15,11 @@ template <typename T, std::size_t... strides>
 	requires (sizeof...(strides) > 0)
 class MDSpan {
 public:
-	constexpr MDSpan() = default;
-	constexpr MDSpan(T* begin) {
-		reset(begin);
+	constexpr MDSpan()
+		: m_begin{ nullptr } {
+	}
+	constexpr MDSpan(T* begin)
+		: m_begin{ begin } {
 	}
 	
 	constexpr void reset(T* begin) {
