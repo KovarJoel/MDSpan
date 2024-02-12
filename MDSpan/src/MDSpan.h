@@ -33,7 +33,7 @@ public:
 			offset += getStridesProduct(size - 1 - i) * arr[i];
 		}
 
-		return *(m_begin + offset);
+		return m_begin[offset];
 	}
 	constexpr T& at(std::integral auto... indices) requires(sizeof...(strides) == sizeof...(indices)) {
 		return const_cast<T&>(std::as_const(*this).at(indices...));
