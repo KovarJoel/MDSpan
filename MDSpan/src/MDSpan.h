@@ -29,16 +29,16 @@ public:
 	}
 	
 	constexpr const T& at(std::integral auto... indices) const requires(sizeof...(strides) == sizeof...(indices)) {
-		return m_begin[getAtIndex<true>(indices...)];
+		return m_begin[getAtIndexWithException(indices...)];
 	}
 	constexpr T& at(std::integral auto... indices) requires(sizeof...(strides) == sizeof...(indices)) {
-		return m_begin[getAtIndex<true>(indices...)];
+		return m_begin[getAtIndexWithException(indices...)];
 	}
 	constexpr const T& operator[](std::size_t index) const requires(sizeof...(strides) == 1) {
-		return m_begin[getAtIndex(index)];
+		return m_begin[getAtIndexWithoutException(index)];
 	}
 	constexpr T& operator[](std::size_t index) requires(sizeof...(strides) == 1) {
-		return m_begin[getAtIndex(index)];
+		return m_begin[getAtIndexWithoutException(index)];
 	}
 	
 	constexpr auto operator[](std::size_t index) requires(sizeof...(strides) > 1) {
@@ -87,7 +87,7 @@ private:
 		return product;
 	}
 
-	template <bool useException = false>
+	template <bool useException>
 	static constexpr std::size_t getAtIndex(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
 		const std::array arr{ indices... };
 		std::size_t offset{};
@@ -104,6 +104,12 @@ private:
 		}
 
 		return offset;
+	}
+	inline static constexpr std::size_t getAtIndexWithException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
+		return getAtIndex<true>(indices...);
+	}
+	inline static constexpr std::size_t getAtIndexWithoutException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
+		return getAtIndex<false>(indices...);
 	}
 
 private:
