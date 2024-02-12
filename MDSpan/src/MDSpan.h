@@ -3,6 +3,8 @@
 #include <concepts>
 #include <utility>
 #include <array>
+#include <stdexcept>
+#include <string>
 
 template <template<typename, auto...> typename U, typename V, auto first, auto... others>
 struct DropFirstPackValue {
@@ -27,22 +29,16 @@ public:
 	}
 	
 	constexpr const T& at(std::integral auto... indices) const requires(sizeof...(strides) == sizeof...(indices)) {
-		const std::array arr{ indices... };
-		std::size_t offset{};
-		for (std::size_t i{}, size{ arr.size() }; i < size; ++i) {
-			offset += getStridesProduct(size - i) * arr[i];
-		}
-
-		return m_begin[offset];
+		return m_begin[getAtIndex<true>(indices...)];
 	}
 	constexpr T& at(std::integral auto... indices) requires(sizeof...(strides) == sizeof...(indices)) {
-		return const_cast<T&>(std::as_const(*this).at(indices...));
+		return m_begin[getAtIndex<true>(indices...)];
 	}
 	constexpr const T& operator[](std::size_t index) const requires(sizeof...(strides) == 1) {
-		return at(index);
+		return m_begin[getAtIndex(index)];
 	}
 	constexpr T& operator[](std::size_t index) requires(sizeof...(strides) == 1) {
-		return at(index);
+		return m_begin[getAtIndex(index)];
 	}
 	
 	constexpr auto operator[](std::size_t index) requires(sizeof...(strides) > 1) {
@@ -89,6 +85,25 @@ private:
 			product *= stride(dimensions() - 1 - i);
 		}
 		return product;
+	}
+
+	template <bool useException = false>
+	static constexpr std::size_t getAtIndex(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
+		const std::array arr{ indices... };
+		std::size_t offset{};
+		for (std::size_t i{}, size{ arr.size() }; i < size; ++i) {
+			if constexpr (useException) {
+				if (arr[i] >= stride(i)) {
+					std::string errorMessage{ "MDSpan::at() access out of bounds! Size: " };
+					errorMessage += std::to_string(stride(i));
+					errorMessage += ", Index: " + std::to_string(arr[i]);
+					throw std::out_of_range(errorMessage.c_str());
+				}
+			}
+			offset += getStridesProduct(size - i) * arr[i];
+		}
+
+		return offset;
 	}
 
 private:

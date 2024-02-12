@@ -126,9 +126,8 @@ static bool testAccess() {
 	MDSpan<int, 2, 3> span{ arr.data() };
 
 	for (std::size_t i{}; i < arr.size(); ++i) {
-		if (arr[i] != span[0][i]
-			|| arr[i] != span.at(0ull, i)
-			|| arr[i] != span[0].at(i)) {
+		// operator[] does not check for out of bounds
+		if (arr[i] != span[0][i]) {
 			return false;
 		}
 	}
@@ -189,6 +188,60 @@ static bool testAccess() {
 
 	return true;
 }
+static bool testAccessOutOfBounds() {
+	std::array<int, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	MDSpan<int, 2, 5> span{ arr.data() };
+
+	// should not throw
+	try {
+		for (std::size_t i{}; i < arr.size(); ++i) {
+			span[i][i + -static_cast<int>(span.stride(span.dimensions() - 1) * i)];
+			span[0][i];
+		}
+	}
+	catch (...) {
+		return false;
+	}
+
+	// should throw
+	for (std::size_t i{}; i < arr.size(); ++i) {
+		const std::size_t stride = span.stride(span.dimensions() - 1);
+		try {
+			span[0].at(i);
+			if (i >= stride) {
+				return false;
+			}
+		}
+		catch (...) {
+			if (i < stride) {
+				return false;
+			}
+		}
+	}
+
+	try {
+		span.at(2, 0);
+		return false;
+	}
+	catch (...) {}
+	try {
+		span.at(0, 5);
+		return false;
+	}
+	catch (...) {}
+	try {
+		span.at(0, -1);
+		return false;
+	}
+	catch (...) {}
+	try {
+		span.at(-1, 0);
+		return false;
+	}
+	catch (...) {}
+
+	return true;
+}
 
 bool passedAllTests() {
 	std::size_t index{};
@@ -199,6 +252,7 @@ bool passedAllTests() {
 	TEST(testEquality);
 	TEST(testDimensionsAndStrides);
 	TEST(testAccess);
+	TEST(testAccessOutOfBounds);
 
 	return !failed;
 }
