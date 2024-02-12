@@ -61,10 +61,10 @@ public:
 		return Iterator{ *this, stride(0) };
 	}
 
-	constexpr static std::size_t dimensions() {
+	static constexpr std::size_t dimensions() {
 		return m_strides.size();
 	}
-	constexpr static std::size_t stride(std::size_t index) {
+	static constexpr std::size_t stride(std::size_t index) {
 		return m_strides[index];
 	}
 
@@ -83,7 +83,7 @@ public:
 	}
 
 private:
-	constexpr static std::size_t getStridesProduct(std::size_t index) {
+	static constexpr std::size_t getStridesProduct(std::size_t index) {
 		std::size_t product{ 1 };
 		for (std::size_t i{}; i + 1 < index; ++i) {
 			product *= stride(dimensions() - 1 - i);
@@ -93,7 +93,7 @@ private:
 
 private:
 	T* m_begin;
-	inline constexpr static std::array m_strides{ strides... };
+	inline static constexpr std::array m_strides{ strides... };
 
 private:
 	class Iterator {
