@@ -137,9 +137,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\MDSpan.h" />
+    <ClCompile Include="tests\Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DynMDSpan.h" />
+    <ClInclude Include="tests\Tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
