@@ -105,10 +105,10 @@ private:
 
 		return offset;
 	}
-	inline static constexpr std::size_t getAtIndexWithException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
+	static constexpr std::size_t getAtIndexWithException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
 		return getAtIndex<true>(indices...);
 	}
-	inline static constexpr std::size_t getAtIndexWithoutException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
+	static constexpr std::size_t getAtIndexWithoutException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
 		return getAtIndex<false>(indices...);
 	}
 
