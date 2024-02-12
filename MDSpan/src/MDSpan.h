@@ -30,7 +30,7 @@ public:
 		const std::array arr{ indices... };
 		std::size_t offset{};
 		for (std::size_t i{}, size{ arr.size() }; i < size; ++i) {
-			offset += getStridesProduct(size - 1 - i) * arr[i];
+			offset += getStridesProduct(size - i) * arr[i];
 		}
 
 		return m_begin[offset];
