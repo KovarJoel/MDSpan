@@ -122,8 +122,8 @@ static bool testDimensionsAndStrides() {
 	return true;
 }
 static bool testAccess() {
-	std::array<int, 9> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-	MDSpan<int, 3, 3> span{ arr.data() };
+	std::array<int, 6> arr{ 0, 1, 2, 3, 4, 5 };
+	MDSpan<int, 2, 3> span{ arr.data() };
 
 	for (std::size_t i{}; i < arr.size(); ++i) {
 		if (arr[i] != span[0][i]
@@ -133,7 +133,7 @@ static bool testAccess() {
 		}
 	}
 
-	for (std::size_t i{}; i < 3; ++i) {
+	for (std::size_t i{}; i < 2; ++i) {
 		for (std::size_t j{}; j < 3; ++j) {
 			if (arr[i * 3 + j] != span[i][j]
 				|| arr[i * 3 + j] != span.at(i, j)
