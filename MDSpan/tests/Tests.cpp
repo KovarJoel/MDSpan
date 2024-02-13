@@ -153,18 +153,12 @@ static bool testAccess() {
 	constexpr int indices[] = { INDICES_DATA };
 	static_assert(std::accumulate(std::begin(indices), std::end(indices), 1, std::multiplies{}) == vecSize);
 	MDSpan<int, INDICES_DATA> hugeSpan{ vec.data() };
+	std::size_t offset{};
 	for (int a = 0; a < indices[0]; ++a) {
 		for (int b = 0; b < indices[1]; ++b) {
 			for (int c = 0; c < indices[2]; ++c) {
 				for (int d = 0; d < indices[3]; ++d) {
 					for (int e = 0; e < indices[4]; ++e) {
-						int offset = 0;
-						offset += e * std::accumulate(std::rbegin(indices), std::rbegin(indices) + 0, 1, std::multiplies{});
-						offset += d * std::accumulate(std::rbegin(indices), std::rbegin(indices) + 1, 1, std::multiplies{});
-						offset += c * std::accumulate(std::rbegin(indices), std::rbegin(indices) + 2, 1, std::multiplies{});
-						offset += b * std::accumulate(std::rbegin(indices), std::rbegin(indices) + 3, 1, std::multiplies{});
-						offset += a * std::accumulate(std::rbegin(indices), std::rbegin(indices) + 4, 1, std::multiplies{});
-
 						int subscript = hugeSpan[a][b][c][d][e];
 						int at = hugeSpan.at(a, b, c, d, e);
 						int both = hugeSpan[a][b][c].at(d, e);
@@ -179,6 +173,8 @@ static bool testAccess() {
 							|| vec[offset] != constAt) {
 							return false;
 						}
+
+						++offset;
 					}
 				}
 			}
