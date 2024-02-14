@@ -42,9 +42,7 @@ public:
 	}
 	
 	constexpr auto operator[](std::size_t index) requires(sizeof...(strides) > 1) {
-		const std::size_t offset{ getStridesProduct(dimensions()) };
-		T* begin{ m_begin + index * offset };
-		return DropFirstPackValue_t<MDSpan, T, strides...>{ begin };
+		return atSpanHelperWithoutException(index);
 	}
 
 	constexpr T* data() {
@@ -79,6 +77,13 @@ public:
 	}
 
 private:
+	static constexpr void throwRangeError(const std::string& method, std::size_t size, std::size_t index) {
+		std::string errorMessage{ "MDSpan::" + method + "() access out of bounds! Size: "};
+		errorMessage += std::to_string(size);
+		errorMessage += ", Index: " + std::to_string(index);
+		throw std::out_of_range(errorMessage.c_str());
+	}
+
 	static constexpr std::size_t getStridesProduct(std::size_t index) {
 		std::size_t product{ 1 };
 		for (std::size_t i{}; i + 1 < index; ++i) {
@@ -88,16 +93,32 @@ private:
 	}
 
 	template <bool useException>
+	constexpr auto atSpanHelper(std::size_t index) {
+		if constexpr (useException) {
+			if (index >= stride(0)) {
+				throwRangeError("at", stride(0), index);
+			}
+		}
+
+		const std::size_t offset{ getStridesProduct(dimensions()) };
+		T* begin{ m_begin + index * offset };
+		return DropFirstPackValue_t<MDSpan, T, strides...>{ begin };
+	}
+	constexpr auto atSpanHelperWithException(std::integral auto... indices) requires(sizeof...(strides) > sizeof...(indices)) {
+		return atSpanHelper<true>(indices...);
+	}
+	constexpr auto atSpanHelperWithoutException(std::integral auto... indices) requires(sizeof...(strides) > sizeof...(indices)) {
+		return atSpanHelper<false>(indices...);
+	}
+
+	template <bool useException>
 	static constexpr std::size_t getAtIndex(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
 		const std::array arr{ indices... };
 		std::size_t offset{};
 		for (std::size_t i{}, size{ arr.size() }; i < size; ++i) {
 			if constexpr (useException) {
 				if (arr[i] >= stride(i)) {
-					std::string errorMessage{ "MDSpan::at() access out of bounds! Size: " };
-					errorMessage += std::to_string(stride(i));
-					errorMessage += ", Index: " + std::to_string(arr[i]);
-					throw std::out_of_range(errorMessage.c_str());
+					throwRangeError("at", stride(i), arr[i]);
 				}
 			}
 			offset += getStridesProduct(size - i) * arr[i];
