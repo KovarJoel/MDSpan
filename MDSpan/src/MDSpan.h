@@ -96,11 +96,11 @@ private:
 	}
 	
 	template <bool useException>	// since non base case needs template
-	static constexpr auto atSpanHelper(const auto& span) {
+	static constexpr auto atSpanHelper(auto span) {
 		return span;
 	}
 	template <bool useException, std::size_t... s>
-	static constexpr auto atSpanHelper(const MDSpan<T, s...>& span, std::size_t firstIndex, std::integral auto... indices) {
+	static constexpr auto atSpanHelper(MDSpan<T, s...> span, std::size_t firstIndex, std::integral auto... indices) {
 		if constexpr (useException) {
 			if (firstIndex >= stride(0)) {
 				throwRangeError("at", stride(0), firstIndex);
