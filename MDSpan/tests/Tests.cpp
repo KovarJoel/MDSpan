@@ -127,7 +127,8 @@ static bool testAccess() {
 
 	for (std::size_t i{}; i < arr.size(); ++i) {
 		// operator[] does not check for out of bounds
-		if (arr[i] != span[0][i]) {
+		if (arr[i] != span[0][i]
+			|| arr[i] != span.at(0)[i]) {
 			return false;
 		}
 	}
@@ -136,7 +137,9 @@ static bool testAccess() {
 		for (std::size_t j{}; j < 3; ++j) {
 			if (arr[i * 3 + j] != span[i][j]
 				|| arr[i * 3 + j] != span.at(i, j)
-				|| arr[i * 3 + j] != span[i].at(j)) {
+				|| arr[i * 3 + j] != span[i].at(j)
+				|| arr[i * 3 + j] != span.at(i).at(j)
+				|| arr[i * 3 + j] != span.at(i)[j]) {
 				return false;
 			}
 		}
@@ -162,6 +165,7 @@ static bool testAccess() {
 						int subscript = hugeSpan[a][b][c][d][e];
 						int at = hugeSpan.at(a, b, c, d, e);
 						int both = hugeSpan[a][b][c].at(d, e);
+						int mixed = hugeSpan.at(a, b)[c].at(d)[e];
 
 						const auto& cref = hugeSpan;
 						int constAt = cref.at(a, b, c, d, e);
@@ -170,7 +174,8 @@ static bool testAccess() {
 						if (vec[offset] != subscript
 							|| vec[offset] != at
 							|| vec[offset] != both
-							|| vec[offset] != constAt) {
+							|| vec[offset] != constAt
+							|| vec[offset] != mixed) {
 							return false;
 						}
 

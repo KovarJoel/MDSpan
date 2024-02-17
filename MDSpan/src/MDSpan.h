@@ -41,6 +41,9 @@ public:
 		return m_begin[getAtIndexWithoutException(index)];
 	}
 	
+	constexpr auto at(std::integral auto... indices) requires(sizeof...(strides) > sizeof...(indices)) {
+		return atSpanHelperWithException(indices...);
+	}
 	constexpr auto operator[](std::size_t index) requires(sizeof...(strides) > 1) {
 		return atSpanHelperWithoutException(index);
 	}
@@ -91,24 +94,30 @@ private:
 		}
 		return product;
 	}
-
-	template <bool useException>
-	constexpr auto atSpanHelper(std::size_t index) {
+	
+	template <bool useException>	// since non base case needs template
+	static constexpr auto atSpanHelper(const auto& span) {
+		return span;
+	}
+	template <bool useException, std::size_t... s>
+	static constexpr auto atSpanHelper(const MDSpan<T, s...>& span, std::size_t firstIndex, std::integral auto... indices) {
 		if constexpr (useException) {
-			if (index >= stride(0)) {
-				throwRangeError("at", stride(0), index);
+			if (firstIndex >= stride(0)) {
+				throwRangeError("at", stride(0), firstIndex);
 			}
 		}
 
-		const std::size_t offset{ getStridesProduct(dimensions()) };
-		T* begin{ m_begin + index * offset };
-		return DropFirstPackValue_t<MDSpan, T, strides...>{ begin };
+		constexpr std::size_t offset{ getStridesProduct(span.dimensions()) };
+		T* begin{ span.m_begin + firstIndex * offset };
+		auto subView = DropFirstPackValue_t<MDSpan, T, s...>{begin};
+		return atSpanHelper<useException>(subView, indices...);
 	}
+
 	constexpr auto atSpanHelperWithException(std::integral auto... indices) requires(sizeof...(strides) > sizeof...(indices)) {
-		return atSpanHelper<true>(indices...);
+		return atSpanHelper<true>(*this, indices...);
 	}
 	constexpr auto atSpanHelperWithoutException(std::integral auto... indices) requires(sizeof...(strides) > sizeof...(indices)) {
-		return atSpanHelper<false>(indices...);
+		return atSpanHelper<false>(*this, indices...);
 	}
 
 	template <bool useException>
@@ -132,6 +141,10 @@ private:
 	static constexpr std::size_t getAtIndexWithoutException(std::integral auto... indices) requires (sizeof...(strides) == sizeof...(indices)) {
 		return getAtIndex<false>(indices...);
 	}
+
+private:
+	// to access privates of MDSpans with different type/strides
+	friend class MDSpan;
 
 private:
 	T* m_begin;
