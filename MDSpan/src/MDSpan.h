@@ -80,8 +80,8 @@ public:
 	}
 
 private:
-	static constexpr void throwRangeError(const std::string& method, std::size_t size, std::size_t index) {
-		std::string errorMessage{ "MDSpan::" + method + "() access out of bounds! Size: "};
+	static void throwRangeError(std::size_t size, std::size_t index) {
+		std::string errorMessage{ "MDSpan::at() access out of bounds! Size: "};
 		errorMessage += std::to_string(size);
 		errorMessage += ", Index: " + std::to_string(index);
 		throw std::out_of_range(errorMessage.c_str());
@@ -103,7 +103,7 @@ private:
 	static constexpr auto atSpanHelper(MDSpan<T, s...> span, std::size_t firstIndex, std::integral auto... indices) {
 		if constexpr (useException) {
 			if (firstIndex >= stride(0)) {
-				throwRangeError("at", stride(0), firstIndex);
+				throwRangeError(stride(0), firstIndex);
 			}
 		}
 
@@ -127,7 +127,7 @@ private:
 		for (std::size_t i{}, size{ arr.size() }; i < size; ++i) {
 			if constexpr (useException) {
 				if (arr[i] >= stride(i)) {
-					throwRangeError("at", stride(i), arr[i]);
+					throwRangeError(stride(i), arr[i]);
 				}
 			}
 			offset += getStridesProduct(size - i) * arr[i];
